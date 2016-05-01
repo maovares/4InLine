@@ -38,6 +38,7 @@ public class GameActivity extends AppCompatActivity
     String actualColor;
     Boolean autoMove;
     int level;
+    int auto;
     TableLayout tableGame;
     ImageView m00,m01,m02,m03,m04,m05,m06,m10,m11,m12,m13,m14,m15,m16,m20,m21,m22,m23,m24,m25,m26,m30,m31,m32,m33,
         m34,m35,m36,m40,m41,m42,m43,m44,m45,m46,m50,m51,m52,m53,m54,m55,m56;
@@ -75,15 +76,21 @@ public class GameActivity extends AppCompatActivity
         email = bundle.getString("email");
         ip = bundle.getString("ip");
         level = bundle.getInt("level");
+        setTitle("Level " + Integer.toString(level));
 
         String photo = getIntent().getExtras().getString("photo");
-
-        //Toast.makeText(this, name+ "  "+email, Toast.LENGTH_SHORT).show();
 
         bar = (SeekBar) findViewById(R.id.seekBar);
 
         String[] colors = {"red","blue"};
         int idx = new Random().nextInt(colors.length);
+        if(idx == 0){
+            auto = 1;
+        }else {
+            auto = 2;
+        }
+
+
         actualColor = (colors[idx]);
         actualColor = changeColor(actualColor);
         autoMove = true;
@@ -244,7 +251,7 @@ public class GameActivity extends AppCompatActivity
                             "000000",
                             "100000",
                             "000000"};*/
-        setMatrix(getGameFromServer(ip,port,"getGameData/"+email,"data"));
+        setMatrix(getGameFromServer(ip,port,"getGameData/"+email));
         //Toast.makeText(GameActivity.this, getStringFromServer("192.168.1.14","3000","getGameData/"+email,"gameID"), Toast.LENGTH_SHORT).show();
 
     }
@@ -383,13 +390,13 @@ public class GameActivity extends AppCompatActivity
                 JSONArray gameJSONArray = new JSONArray(Arrays.asList(getMatrix()));
 
                 if (autoMove){
-                    int pos = getWinnerFromServer(ip, port,"sendGameMatriz/"+gameJSONArray+"/"+level);
+                    int pos = getWinnerFromServer(ip, port,"sendGameMatriz/"+gameJSONArray+"/"+level+"/"+auto);
                     autoMove = false;
                     if ( pos != -1 ){
                         clickColum(gameMatrix.get(pos));
                     }
                 }else {
-                    getWinnerFromServer(ip, port,"sendGameMatriz/"+gameJSONArray+"/"+level);
+                    getWinnerFromServer(ip, port,"sendGameMatriz/"+gameJSONArray+"/"+level+"/"+auto);
                     autoMove = true;
                 }
 
@@ -477,12 +484,12 @@ public class GameActivity extends AppCompatActivity
         return aux;
     }*/
 
-    public String[] getGameFromServer(String ip, String port,String url, String attr){
+    public String[] getGameFromServer(String ip, String port,String url){
         String[] newArray={};
         try{
             String data = node.getResponse(ip+":"+port+"/"+url);
             JSONObject dataJson = node.toJSON(data);
-            JSONArray a = dataJson.getJSONArray(attr);
+            JSONArray a = dataJson.getJSONArray("data");
             newArray = jsonToStringArray(a);
         }catch (Exception e){
             //Toast.makeText(GameActivity.this, "Error!!\n"+e.getMessage(), Toast.LENGTH_LONG).show();

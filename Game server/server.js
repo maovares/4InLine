@@ -2,6 +2,8 @@
 
 var gameLogic = require('./js/winner.js');
 var level1 = require('./js/level1.js');
+var level2 = require('./js/level2.js');
+var level3 = require('./js/level3.js');
 
 var express = require('express');
 var app = express();
@@ -19,31 +21,34 @@ app.get('/getGameData',function(req, res){
   res.send(JSON.stringify(matrix));
   console.log(matrix);
 });
-
 app.get('/sendGameData',function(req, res) {
-
 });*/
 
-app.get('/sendGameMatriz/:matriz/:level', function(req,res){
+app.get('/sendGameMatriz/:matriz/:level/:player', function(req,res){
     var matriz = req.params.matriz;
     var level = req.params.level;
-    
-    //var user = req.params.email;
-    //console.log(level);  
-    //var winner = "0";
-    
+    var player = req.params.player;
+
+    //console.log(player);
+
     var jsonMatriz = JSON.parse(matriz);
     if(gameLogic.checkWinner(jsonMatriz, 1)){
         res.json({"data":"OK","winner":"1", "moveColum":-1});
-        
+
     }else if(gameLogic.checkWinner(jsonMatriz, 2)){
         res.json({"data":"OK","winner":"2", "moveColum":-1});
-        
+
     }else{
-        res.json({"data":"OK","winner":"0","moveColum":level1.newMovement(jsonMatriz)});
+      if (level == 1) {
+          res.json({"data":"OK","winner":"0","moveColum":level1.newMovement(jsonMatriz)});
+      }else if (level == 2) {
+          res.json({"data":"OK","winner":"0","moveColum":level2.newMovement(jsonMatriz,player)});
+          //level2.newMovement(jsonMatriz,player);
+
+      }
     }
-    
-    
+
+
 });
 
 
@@ -55,9 +60,6 @@ app.get('/getGameData/:email',function(req,res){
 	});
 });
 
-
-
-//gameLogic.checkWinner(matrix.data, 2);
 
 
 app.listen(port);

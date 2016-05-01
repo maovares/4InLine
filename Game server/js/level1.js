@@ -2,7 +2,7 @@ exports.newMovement = function(gameArray){
     var columZeros = [];
     for(i = 0; i < gameArray.length; i++){
         if(countZeros(gameArray[i]) > 0){
-            columZeros.push(i);   
+            columZeros.push(i);
         }
     }
     var randomNumber = Math.floor(Math.random()*columZeros.length+0);
