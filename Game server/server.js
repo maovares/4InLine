@@ -15,21 +15,41 @@ var port = 3000;
 app.use(express.static(__dirname+'/public'));
 app.use(bodyParser.json());
 
-/*
-app.get('/getGameData',function(req, res){
+
+app.get('/newGame/:email',function(req, res){
+  console.log("NEW");
+  var email = req.params.email;
+  var newGameID = "";
+  db.gamesCounter.findOne(function(err,docs) {
+    var counter = docs.counter;
+    var lastCounter = docs.counter;
+    var id = docs._id;
+    counter = counter+1;
+    newGameID = '4line-' + counter;
+    db.gamesData.insert({'gameID':newGameID,
+                        'user1':email,
+                        'user2':'',
+                        'turn':1,
+                        'data':['000000','000000','000000','000000','000000','000000','000000']
+                      },
+          function(err,docs){
+            db.gamesCounter.findAndModify({
+              query: {_id: id},
+              update:
+              {$set:{counter:counter}}, new:true},function(err,doc){
+                res.json({'newGameID':newGameID,'status':0});
+            });
+          });
+  });
+  /*
   res.setHeader('Content-Type', 'application/json');
-  res.send(JSON.stringify(matrix));
-  console.log(matrix);
+  res.send(JSON.stringify(matrix));*/
 });
-app.get('/sendGameData',function(req, res) {
-});*/
 
 app.get('/sendGameMatriz/:matriz/:level/:player', function(req,res){
     var matriz = req.params.matriz;
     var level = req.params.level;
     var player = req.params.player;
-
-    //console.log(player);
 
     var jsonMatriz = JSON.parse(matriz);
     if(gameLogic.checkWinner(jsonMatriz, 1)){
@@ -43,24 +63,34 @@ app.get('/sendGameMatriz/:matriz/:level/:player', function(req,res){
           res.json({"data":"OK","winner":"0","moveColum":level1.newMovement(jsonMatriz)});
       }else if (level == 2) {
           res.json({"data":"OK","winner":"0","moveColum":level2.newMovement(jsonMatriz,player)});
-          //level2.newMovement(jsonMatriz,player);
-
       }
     }
-
 
 });
 
 
 app.get('/getGameData/:email',function(req,res){
     var user = req.params.email;
-	db.gamesData.findOne({user1:user},function(err,docs){
-		res.json(docs);
-        console.log(docs.data);
+	db.gamesData.find({user1:user}).sort({$natural : -1}).limit(1,function(err,docs){
+		res.json(docs[0]);
+      console.log(docs[0]);
 	});
 });
 
+app.get('/updateData/:matriz/:gameID',function(req,res){
+  var gameID = req.params.gameID;
+  var gameMatriz = req.params.matriz;
+  var jsonMatriz = JSON.parse(gameMatriz);
 
+  console.log("UPDATING...");
+
+  db.gamesData.findAndModify({
+    query: {gameID: gameID},
+    update:
+    {$set:{data:jsonMatriz}}, new:true},function(err,doc){
+      res.json({'status':0});
+  });
+});
 
 app.listen(port);
 console.log("Server ok in port: "+port);
