@@ -37,7 +37,19 @@ exports.countMaxAround = function(gameArray, playerNumber){
     return colums;
 };
 
+
+exports.countZeros = function(text){
+    var cont = 0;
+    for(var j = 0; j < text.length; j++){
+        if(text[j] == 0){
+            cont++;
+        }
+    }
+    return cont;
+}
+
 //i j--
+
 var checkDown = function(gameArray, i, j, playerNumber){
       var cont = 0;
         for(var x = j-1; gameArray[i][x]!=undefined && gameArray[i][x] == playerNumber; x--){
@@ -118,3 +130,12 @@ var checkLeftUp = function(gameArray, i, j, playerNumber){
         }
     return cont;
 };
+
+exports.changePlayer = function(player){
+  if(player == "1"){
+    player = "2";
+  }else {
+    player = "1";
+  }
+  return player;
+}

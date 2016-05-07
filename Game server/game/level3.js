@@ -1,9 +1,10 @@
 'use strict'
 
-var countMax = require('./countMaxAround.js');
+var utilities = require('./utilities.js');
 
 exports.newMovement = function(gameArray, playerNumber){
-  var bestMovementsArray = countMax.countMaxAround(gameArray, playerNumber);
+  playerNumber = utilities.changePlayer(playerNumber);
+  var bestMovementsArray = utilities.countMaxAround(gameArray, playerNumber);
   var randomNumber = Math.floor(Math.random()*bestMovementsArray.length+0);
   return bestMovementsArray[randomNumber];
-}
+};
