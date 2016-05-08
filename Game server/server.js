@@ -1,9 +1,9 @@
 'use strict'
 
-var gameLogic = require('./js/winner.js');
-var level1 = require('./js/level1.js');
-var level2 = require('./js/level2.js');
-var level3 = require('./js/level3.js');
+var gameLogic = require('./game/winner.js');
+var level1 = require('./game/level1.js');
+var level2 = require('./game/level2.js');
+var level3 = require('./game/level3.js');
 
 var express = require('express');
 var app = express();
@@ -29,6 +29,8 @@ app.get('/newGame/:email',function(req, res){
     db.gamesData.insert({'gameID':newGameID,
                         'user1':email,
                         'user2':'',
+                        'winner':'NA',
+                        'loser':'NA',
                         'turn':1,
                         'data':['000000','000000','000000','000000','000000','000000','000000']
                       },
@@ -41,9 +43,6 @@ app.get('/newGame/:email',function(req, res){
             });
           });
   });
-  /*
-  res.setHeader('Content-Type', 'application/json');
-  res.send(JSON.stringify(matrix));*/
 });
 
 app.get('/sendGameMatriz/:matriz/:level/:player', function(req,res){
@@ -63,6 +62,8 @@ app.get('/sendGameMatriz/:matriz/:level/:player', function(req,res){
           res.json({"data":"OK","winner":"0","moveColum":level1.newMovement(jsonMatriz)});
       }else if (level == 2) {
           res.json({"data":"OK","winner":"0","moveColum":level2.newMovement(jsonMatriz,player)});
+      }else if (level == 3) {
+          res.json({"data":"OK","winner":"0","moveColum":level3.newMovement(jsonMatriz,player)});
       }
     }
 
@@ -82,7 +83,8 @@ app.get('/updateData/:matriz/:gameID',function(req,res){
   var gameMatriz = req.params.matriz;
   var jsonMatriz = JSON.parse(gameMatriz);
 
-  console.log("UPDATING...");
+  console.log('---------------------------------');
+  console.log(jsonMatriz);
 
   db.gamesData.findAndModify({
     query: {gameID: gameID},
@@ -91,6 +93,37 @@ app.get('/updateData/:matriz/:gameID',function(req,res){
       res.json({'status':0});
   });
 });
+
+
+app.get('/updatePlayerStats/:gameID/:winner/:loser', function(req, res){
+  console.log("UPDATING STATS..... :) ");
+  var winner = req.params.winner;
+  var loser = req.params.loser;
+  var gameID = req.params.gameID;
+  db.gamesData.findAndModify({
+    query: {gameID: gameID},
+    update:
+    {$set:{winner:winner,loser:loser}}, new:true},function(err,doc){
+      res.json({'status':0});
+  });
+});
+
+
+app.get('/getStats/:player', function(req, res){
+  console.log("GETTING STATS...");
+  var player = req.params.player;
+  var win = 0;
+  var los = 0;
+
+  db.gamesData.count({winner: player},function(error,docs){
+    win = docs;
+    db.gamesData.count({loser: player},function(error,docs){
+      los = docs;
+        res.json({'status':0,'win':win,'los':los});
+    });
+  });
+});
+
 
 app.listen(port);
 console.log("Server ok in port: "+port);
